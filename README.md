@@ -38,11 +38,28 @@ https://github.com/ansible/ansible
 
 ### 5. Primeros pasos. Comandos ad-hoc
 - __5.1. Inventarios__: Un inventario es un fichero que contiene las máquinas con las que quiero trabajar.
-    Dado un inventario de máquinas llamado maquinas, con el módulo (-m) ping hacemos ping a las máquinas ```ansible -i maquinas all -m ping```:
-       ```json 192.168.50.2 | SUCCESS => {
+    Dado un inventario de máquinas llamado maquinas, con el módulo (-m) ping hacemos ping a las máquinas (-i = inventario) ```ansible -i maquinas all -m ping```:    
+    ```json 192.168.50.2 | SUCCESS => {
         "ansible_facts": {
             "discovered_interpreter_python": "/usr/bin/python3"
         },
         "changed": false,
         "ping": "pong"
     }```
+
+-__5.2. Command & Shell__:
+Con el siguiente comando se deuvlve la fecha de la máquina debian1 ```ansible -i maquinas debian1 -m command -a "date"```
+Es posible enviar comandos que realicen cambios en debian1: ```ansible -i maquinas debian1 -m command -a  "touch /tmp/f1.txt"```
+Es posible recuperar la configuración del sistema con comandos como: ```ansible -i maquinas debian1 -m setup```
+
+-__5.3. Copiando ficheros__:
+  - i = inventario; -a=argumentos, -m=módulo
+- ```ansible debian1 -i maquinas -m copy -a "src=/home/directorio/ansible/prueba.txt dest=/home/prueba/prueba.txt"```
+- Es posible darle permisos, en este caso de ejecución, lectura y escritura:  ``` ansible debian1 -i maquinas -m copy -a "src=/home/jorgegarciaotero/ansible/practicas/prueba.txt dest=/home/prueba/prueba.txt mode=777"```
+
+-__5.3. Paquetes de Sistema: Instalando y arrancando un paquete__ 
+    - Instalamos el servicio con el módulo yum y state=present/latest... para el servicio httpd ```ansible -i maquinas rocky1 -m yum -a "name=httpd state=present"```
+    - Con el módulo service y state=started (podría ser reloaded,restarted,stopped también)```ansible -i maquinas rocky1 -m service -a "name=httpd state=started"```
+        https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html
+        Al entrar a la máquina y hacer el ```systemctl status httpd``` comprobamos efectivamente que está arrancado el servicio
+
