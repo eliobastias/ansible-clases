@@ -36,3 +36,13 @@ https://github.com/ansible/ansible
     - Vamos a cd /home/>usuario>/.ssh/  y vemos que se ha generadoid_rsa e id_rsa.pub. Al hacer ```cat id_rsa.pub``` vemos la clave privada y el usuario y la máquina desde la que está trabajando.
     - Vamos a la máquina remota y lo metemos en el authorized-keys en la carpeta .ssh y metemos la  clave púbica
 
+### 5. Primeros pasos. Comandos ad-hoc
+- __5.1. Inventarios__: Un inventario es un fichero que contiene las máquinas con las que quiero trabajar.
+    Dado un inventario de máquinas llamado maquinas, con el módulo (-m) ping hacemos ping a las máquinas ```ansible -i maquinas all -m ping```:
+       ``` 192.168.50.2 | SUCCESS => {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/bin/python3"
+        },
+        "changed": false,
+        "ping": "pong"
+    }```
