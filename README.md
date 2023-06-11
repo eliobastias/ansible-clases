@@ -46,20 +46,75 @@ https://github.com/ansible/ansible
         "changed": false,
         "ping": "pong"
     }```
+    Listar los hosts ```ansible -i maquinas all --list-hosts```
 
--__5.2. Command & Shell__:
+- __5.2. Command & Shell__:
 Con el siguiente comando se deuvlve la fecha de la máquina debian1 ```ansible -i maquinas debian1 -m command -a "date"```
 Es posible enviar comandos que realicen cambios en debian1: ```ansible -i maquinas debian1 -m command -a  "touch /tmp/f1.txt"```
 Es posible recuperar la configuración del sistema con comandos como: ```ansible -i maquinas debian1 -m setup```
 
--__5.3. Copiando ficheros__:
+- __5.3. Copiando ficheros__:
   - i = inventario; -a=argumentos, -m=módulo
 - ```ansible debian1 -i maquinas -m copy -a "src=/home/directorio/ansible/prueba.txt dest=/home/prueba/prueba.txt"```
 - Es posible darle permisos, en este caso de ejecución, lectura y escritura:  ``` ansible debian1 -i maquinas -m copy -a "src=/home/jorgegarciaotero/ansible/practicas/prueba.txt dest=/home/prueba/prueba.txt mode=777"```
 
--__5.3. Paquetes de Sistema: Instalando y arrancando un paquete__ 
+- __5.4. Paquetes de Sistema: Instalando y arrancando un paquete__ 
     - Instalamos el servicio con el módulo yum y state=present/latest... para el servicio httpd ```ansible -i maquinas rocky1 -m yum -a "name=httpd state=present"```
     - Con el módulo service y state=started (podría ser reloaded,restarted,stopped también)```ansible -i maquinas rocky1 -m service -a "name=httpd state=started"```
         https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html
         Al entrar a la máquina y hacer el ```systemctl status httpd``` comprobamos efectivamente que está arrancado el servicio
 
+- __5.5. Escalado de privilegios__:
+Nos permite ejecutar tareas como root o como otro user. Ésto se puede hacer mediante la cláusula become, que permite convertirnos temporalmente en otro user distinto al que nos hemos conectado.
+Las principales directivas son:
+    - become: Activa la escalada de privilegios.
+    - become_user: usuario en el que queremos convertirnos, por defecto root.
+    - become_method: el método que queremos utilizar en el sistema operativo para la escalada, por ejemplo sudo.
+    - become_flags: permite especificar las opciones en el momento de la escalada.
+    ```ansible -i maquinas debian1 -m service -a "name=apache2 state=started" -b ```
+    ```ansible -i maquinas ubuntu1 --become --ask-become-pass -m apt -a "name=apache2 state=present" ```
+
+### 6.Ficheros de configuración e inventario
+Ansible tiene distintas formas de configurar su funcionamiento:
+- Fichero de configuración,
+- Variables de entorno,
+- Opciones de línea de comandos,
+- Opciones y variables en los Play Books
+
+- __6.1.Fichero de configuración:__
+Ansible tiene un fichero llamado "ansible.cfg" donde ponemos los valores por defecto de nuestro Ansible. Está formado por un conjunto de opciones y propiedades que ya tienen un valor predefinido y que no necesito cambiar a través de este fichero. Este fichero se puede encontrar en:
+  - ANSIBLE_CONFIG: Variable de entorno.
+  - Ansible.cfg en el directorio actual. por tanto así podemos tener un fichero de configuración a nivel de proyecto.
+  - ~/.ansible.cfg en el directorio home del user
+  - /etc/ansible/ansible.cfg
+  - Se pueden poner comentarios con # o ;
+  - Se pueden agrupar en secciones con []
+  - Generamos el fichero con el comando ```ansible-config init --disabled > ansible.cfg```. Con el --disabled me lo deja todo comentado
+
+- __6.2.Inventarios:__
+Nos permiten indicar los servidores a los que queremos conectarnos. Puede ser en un único fichero, una lista o usar plugins más avanzados que nos permitan personalizar los datos.
+Por defecto, se busca el fichero en /etc/ansible/hosts, pero con la opción -i podemos cambiar su ubicación fácilmente: ```ansible -i fichero_inventario```
+
+
+### 6.Playbooks
+Plantilla que nos permite ejecutar entornos complejos dentro de ansible sin necesidad de intervención humana. 
+Se compone de tareas que se pueden combinar en un componente llamado "play". Varios plays confirman un Playbook.
+Tenemos varias acciones con las que se puede trabajar dentro de un playbook:
+- Hosts --> máquinas donde se ejecuta.
+- Vars --> variables del play
+- Tasks --> lista de tareas a ejecutar en el play.
+- Handlers --> tareas que se ejecutan solo ante algún cambio.
+- Roles --> roles a ser importados. Cargan de forma ordenada recursos.
+
+Ejecutamos un playbook llamado ping.yaml con: ```ansible-playbook -i maquinas ping.yaml```
+```---
+- name: Primer play del curso.
+  hosts: all
+  tasks:
+    - name: Hacer un ping
+      ping:
+    - name: crear un fichero
+      ansible.builtin.shell:
+        touch /tmp/fichero1.txt
+
+```
