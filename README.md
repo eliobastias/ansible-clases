@@ -39,7 +39,7 @@ https://github.com/ansible/ansible
 ### 5. Primeros pasos. Comandos ad-hoc
 - __5.1. Inventarios__: Un inventario es un fichero que contiene las máquinas con las que quiero trabajar.
     Dado un inventario de máquinas llamado maquinas, con el módulo (-m) ping hacemos ping a las máquinas ```ansible -i maquinas all -m ping```:
-       ``` 192.168.50.2 | SUCCESS => {
+       ```json 192.168.50.2 | SUCCESS => {
         "ansible_facts": {
             "discovered_interpreter_python": "/usr/bin/python3"
         },
