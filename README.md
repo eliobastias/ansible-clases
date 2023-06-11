@@ -1,6 +1,6 @@
 ## ANSIBLE
 ### Documentación:
-https://docs.ansible.com/developers.html
+https://docs.ansible.com/developers.html,
 https://github.com/ansible/ansible
 
 ### 1. Qué es Ansible:
@@ -39,13 +39,16 @@ https://github.com/ansible/ansible
 ### 5. Primeros pasos. Comandos ad-hoc
 - __5.1. Inventarios__: Un inventario es un fichero que contiene las máquinas con las que quiero trabajar.
     Dado un inventario de máquinas llamado maquinas, con el módulo (-m) ping hacemos ping a las máquinas (-i = inventario) ```ansible -i maquinas all -m ping```:    
-    ```json 192.168.50.2 | SUCCESS => {
+    ```json 
+        192.168.50.2 | SUCCESS => {
         "ansible_facts": {
             "discovered_interpreter_python": "/usr/bin/python3"
         },
         "changed": false,
         "ping": "pong"
-    }```
+    }
+    ```
+    
     Listar los hosts ```ansible -i maquinas all --list-hosts```
 
 - __5.2. Command & Shell__:
@@ -116,5 +119,4 @@ Ejecutamos un playbook llamado ping.yaml con: ```ansible-playbook -i maquinas pi
     - name: crear un fichero
       ansible.builtin.shell:
         touch /tmp/fichero1.txt
-
 ```
