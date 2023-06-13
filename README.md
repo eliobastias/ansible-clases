@@ -119,4 +119,102 @@ Ejecutamos un playbook llamado ping.yaml con: ```ansible-playbook -i maquinas pi
     - name: crear un fichero
       ansible.builtin.shell:
         touch /tmp/fichero1.txt
+
+- name: Instalar nginx
+  hosts: debian1
+  tasks:
+    - name: Parar apache
+      ansible.builtin.service:
+        name: apache2
+        state: stopped
+    - name: Instalar nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+    - name: Arrancar Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
 ```
+
+
+### 7.Variables
+Ansible dispone de varias formas de implementar variables:
+- De entorno:  se usan para definir valores en el SO, como ANSIBLE_CONFIG.
+- En los ficheros de inventario: se incluyen en los ficheros de inventarios y se pueden aplicar a nivel de hosts o grupo.
+- En los playbooks: podemos definirlas a nivel de play e incluso de task.
+- En los roles:- se usan dentro de un Role. 
+- Especiales: 
+  - Magic: variables que reflejan el estado interno y no son modificables.
+  - Facts: contienen info de un host.
+  - Conexión: determinan como se ejecutan las acciones cotnra un target, por ejemplo ansible_become_user
+Las variables en si mismo no son nada, se le pasan al playbook.
+- Ejemplo1 (maquinas):
+    ```[debian]
+       debian1
+       debian2
+       [ubuntu]
+       ubuntu1 puerto=9000 entorno=desarrollo
+    ```
+- Ejemplo2: Formato yaml (maquinas.yaml)
+    ```all
+        hosts:
+            debian1:
+            ubuntu1:
+                puerto: 9000
+                entorno: desarrrollo
+ 
+    ```
+Cogiendo el fichero maquinas, vemos que podemos hacer que las máquinas debian hereden la variable puerto=9090 con [debian:vars]
+    ```[debian]
+    debian1
+    debian2
+
+    [debian:vars]
+    puerto=9090
+
+    [rocky]
+    rocky1
+    rocky2
+
+    [ubuntu]
+    ubuntu1 puerto=9090 entorno=desarrollo ansible_user=pepe
+
+    [servidores_de_datos]
+    mysql1
+
+    [servidores_de_aplicaciones]
+    tomcat1
+    tomcat2```
+
+Puedo coger variables de grupos anidados
+```[debian]
+debian1
+debian2
+
+[debian:vars]
+puerto=9090
+
+[rocky]
+rocky1
+rocky2
+
+[ubuntu]
+ubuntu1 puerto=9090 entorno=desarrollo
+
+[servidores_de_datos]
+mysql1
+
+[servidores_de_aplicaciones]
+tomcat1
+tomcat2
+
+[desarrollo:children]
+debian
+ubuntu
+
+[desarrollo:vars]
+ansible_user=juan
+```
+
