@@ -147,7 +147,7 @@ Ansible dispone de varias formas de implementar variables:
 - En los roles:- se usan dentro de un Role. 
 - Especiales: 
   - Magic: variables que reflejan el estado interno y no son modificables.
-  - Facts: contienen info de un host.
+  - Facts: contienen info de un host: ``` ansible debian1 -m setup``` ,```ansible debian1 -m setup -a "filter=ansible_proc_cmdline``` 
   - Conexión: determinan como se ejecutan las acciones cotnra un target, por ejemplo ansible_become_user
 Las variables en si mismo no son nada, se le pasan al playbook.
 - Ejemplo1 (maquinas):
@@ -218,3 +218,47 @@ ubuntu
 ansible_user=juan
 ```
 
+Creamos el playbook variables.yaml, cargamos la info siguiente y lo ejecutamos mediante ```ansible-playbook variables.yaml```
+```---
+- name: Prueba con variables
+  hosts: debian1
+
+  tasks:
+  - name: ver variables
+    debug:
+      msg: esto es una prueba```
+
+Otra  forma:
+```
+---
+- name: Prueba con variables
+  hosts: debian1
+  vars:
+    - mensaje: "Esto es un mesnaje de ansible"
+    - curso: "dentro del curso de ansible"
+
+  tasks:
+  - name: ver variables
+    debug:
+      msg: "{{mensaje}} {{curso}}" 
+```
+Resultado:
+```
+oot@vweb-1:/home/jorgegarciaotero/ansible# ansible-playbook variables.yaml
+[DEPRECATION WARNING]: Ansible will require Python 3.8 or newer on the controller starting with Ansible 2.12. Current version: 3.6.9 (default, Mar 10 2023, 16:46:00) [GCC 8.4.0]. This 
+feature will be removed from ansible-core in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+
+PLAY [Prueba con variables] ***************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************************
+ok: [debian1]
+
+TASK [ver variables] **********************************************************************************************************************************************************************
+ok: [debian1] => {
+    "msg": "Esto es un mesnaje de ansible dentro del curso de ansible"
+}
+
+PLAY RECAP ********************************************************************************************************************************************************************************
+debian1                    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+```
