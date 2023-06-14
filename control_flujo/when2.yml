@@ -1,0 +1,15 @@
+---
+- name: Prueba con WHEN. visualizar la fecha en los debian
+  hosts: all
+
+  tasks:
+  - name: Capturar fecha
+    shell:
+     cmd: date
+    register: fecha
+    when: ansible_distribution=='Debian' or ansible_facts['distribution']=='Rocky'
+
+  - name: Visualizar fecha
+    ansible.builtin.debug:
+      msg: "{{fecha.stdout}}"
+    when: ansible_distribution=='Debian' or ansible_facts['distribution']=='Rocky'

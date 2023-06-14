@@ -262,3 +262,54 @@ PLAY RECAP *********************************************************************
 debian1                    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 
 ```
+
+
+### 8.Control de Flujo. Condicionales, bucles y errores.
+- __WHEN:__:
+  - No se usan doble llaves. Se evalua para todos los hosts.
+  - Operadores:   < > >= <= !=  ==
+  - "is defined"  permite saber si una variable existe.
+  - para buscar en un array se puede usar el operador "in"
+ ```TASK [Gathering Facts] ********************************************************************************************************************************************************************
+      ok: [tomcat1]
+      ok: [tomcat2]
+      ok: [mysql1]
+      [WARNING]: Platform linux on host rocky1 is using the discovered Python interpreter at /usr/bin/python3.9, but future installation of another Python interpreter could change the meaning
+      of that path. See https://docs.ansible.com/ansible-core/2.11/reference_appendices/interpreter_discovery.html for more information.
+      ok: [rocky1]
+      [WARNING]: Platform linux on host rocky2 is using the discovered Python interpreter at /usr/bin/python3.9, but future installation of another Python interpreter could change the meaning
+      of that path. See https://docs.ansible.com/ansible-core/2.11/reference_appendices/interpreter_discovery.html for more information.
+      ok: [rocky2]
+      ok: [debian1]
+      ok: [debian2]
+      ok: [ubuntu1]
+
+      TASK [Capturar fecha] *********************************************************************************************************************************************************************
+      skipping: [rocky1]
+      skipping: [rocky2]
+      changed: [debian1]
+      changed: [tomcat2]
+      changed: [mysql1]
+      changed: [debian2]
+      changed: [tomcat1]
+      skipping: [ubuntu1]
+
+      TASK [Visualizar fecha] *******************************************************************************************************************************************************************
+      skipping: [rocky1]
+      skipping: [rocky2]
+      ok: [mysql1] => {
+          "msg": "Wed Jun 14 17:53:43 UTC 2023"
+      }
+      ok: [tomcat1] => {
+          "msg": "Wed Jun 14 17:53:43 UTC 2023"
+      }
+      ok: [tomcat2] => {
+          "msg": "Wed Jun 14 17:53:43 UTC 2023"
+      }
+      ok: [debian1] => {
+          "msg": "Wed Jun 14 17:53:43 UTC 2023"
+      }
+      ok: [debian2] => {
+          "msg": "Wed Jun 14 17:53:43 UTC 2023"
+      }
+      skipping: [ubuntu1]```
