@@ -163,9 +163,7 @@ Las variables en si mismo no son nada, se le pasan al playbook.
             debian1:
             ubuntu1:
                 puerto: 9000
-                entorno: desarrrollo
- 
-    ```
+                entorno: desarrrollo ```
 Cogiendo el fichero maquinas, vemos que podemos hacer que las máquinas debian hereden la variable puerto=9090 con [debian:vars]
     ```[debian]
     debian1
@@ -215,8 +213,7 @@ debian
 ubuntu
 
 [desarrollo:vars]
-ansible_user=juan
-```
+ansible_user=juan```
 
 Creamos el playbook variables.yaml, cargamos la info siguiente y lo ejecutamos mediante ```ansible-playbook variables.yaml```
 ```---
@@ -229,8 +226,7 @@ Creamos el playbook variables.yaml, cargamos la info siguiente y lo ejecutamos m
       msg: esto es una prueba```
 
 Otra  forma:
-```
----
+```---
 - name: Prueba con variables
   hosts: debian1
   vars:
@@ -240,8 +236,7 @@ Otra  forma:
   tasks:
   - name: ver variables
     debug:
-      msg: "{{mensaje}} {{curso}}" 
-```
+      msg: "{{mensaje}} {{curso}}" ```
 Resultado:
 ```oot@vweb-1:/home/jorgegarciaotero/ansible# ansible-playbook variables.yaml
 [DEPRECATION WARNING]: Ansible will require Python 3.8 or newer on the controller starting with Ansible 2.12. Current version: 3.6.9 (default, Mar 10 2023, 16:46:00) [GCC 8.4.0]. This 
