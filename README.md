@@ -187,7 +187,7 @@ Cogiendo el fichero maquinas, vemos que podemos hacer que las máquinas debian h
     tomcat2```
 
 Puedo coger variables de grupos anidados
-```[debian]
+`[debian]
 debian1
 debian2
 
@@ -213,7 +213,7 @@ debian
 ubuntu
 
 [desarrollo:vars]
-ansible_user=juan```
+ansible_user=juan`
 
 Creamos el playbook variables.yaml, cargamos la info siguiente y lo ejecutamos mediante ```ansible-playbook variables.yaml```
 ```---
