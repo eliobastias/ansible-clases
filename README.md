@@ -312,3 +312,52 @@ Tenemos distintos bucles:
   - Loop:
   - whit_<lookup>   whit_items, whit_list,  with_sequence ...
   - until
+En el siguiente ejempolo, con cada valor de loop, {{msg}} adquiere el valor de valor1, valor2, valor3:
+```---
+- name: Prueba básica con LOOP
+  hosts: debian1
+
+  tasks:
+  - name: Visualizar contenido con loop
+    ansible.builtin.debug:
+      msg: "{{item}}"    
+    loop:
+       - valor1
+       - valor2
+       - valor3
+
+  - name: Visualizar contenido con with_items
+    ansible.builtin.debug:
+      msg: "{{item}}"    
+    with_items:
+       - valor1
+       - valor2
+       - valor3```
+Resultado:
+```TASK [Gathering Facts] ********************************************************************************************************************************************************************
+ok: [debian1]
+
+TASK [Visualizar contenido con loop] ******************************************************************************************************************************************************
+ok: [debian1] => (item=valor1) => {
+    "msg": "valor1"
+}
+ok: [debian1] => (item=valor2) => {
+    "msg": "valor2"
+}
+ok: [debian1] => (item=valor3) => {
+    "msg": "valor3"
+}
+
+TASK [Visualizar contenido con with_items] ************************************************************************************************************************************************
+ok: [debian1] => (item=valor1) => {
+    "msg": "valor1"
+}
+ok: [debian1] => (item=valor2) => {
+    "msg": "valor2"
+}
+ok: [debian1] => (item=valor3) => {
+    "msg": "valor3"
+}
+
+PLAY RECAP ********************************************************************************************************************************************************************************
+debian1```
