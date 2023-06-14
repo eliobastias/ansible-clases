@@ -243,8 +243,7 @@ Otra  forma:
       msg: "{{mensaje}} {{curso}}" 
 ```
 Resultado:
-```
-oot@vweb-1:/home/jorgegarciaotero/ansible# ansible-playbook variables.yaml
+```oot@vweb-1:/home/jorgegarciaotero/ansible# ansible-playbook variables.yaml
 [DEPRECATION WARNING]: Ansible will require Python 3.8 or newer on the controller starting with Ansible 2.12. Current version: 3.6.9 (default, Mar 10 2023, 16:46:00) [GCC 8.4.0]. This 
 feature will be removed from ansible-core in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
 
@@ -259,12 +258,11 @@ ok: [debian1] => {
 }
 
 PLAY RECAP ********************************************************************************************************************************************************************************
-debian1                    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-```
+debian1                    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0```
 
 
 ### 8.Control de Flujo. Condicionales, bucles y errores.
+Ejemplos en /control_flujo
 - __WHEN:__:
   - No se usan doble llaves. Se evalua para todos los hosts.
   - Operadores:   < > >= <= !=  ==
@@ -313,3 +311,9 @@ debian1                    : ok=2    changed=0    unreachable=0    failed=0    s
           "msg": "Wed Jun 14 17:53:43 UTC 2023"
       }
       skipping: [ubuntu1]```
+  
+- __BUCLES:__:
+Tenemos distintos bucles:
+  - Loop:
+  - whit_<lookup>   whit_items, whit_list,  with_sequence ...
+  - until
