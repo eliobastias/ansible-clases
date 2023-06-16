@@ -189,7 +189,8 @@ tomcat2
 ```
 
 Puedo coger variables de grupos anidados
-```[debian]
+```
+[debian]
 debian1
 debian2
 
@@ -215,20 +216,24 @@ debian
 ubuntu
 
 [desarrollo:vars]
-ansible_user=juan```
+ansible_user=juan
+```
 
 Creamos el playbook variables.yaml, cargamos la info siguiente y lo ejecutamos mediante ```ansible-playbook variables.yaml```
-```---
+```
+---
 - name: Prueba con variables
   hosts: debian1
 
   tasks:
   - name: ver variables
     debug:
-      msg: esto es una prueba```
+      msg: esto es una prueba
+```
 
 Otra  forma:
-```---
+```
+---
 - name: Prueba con variables
   hosts: debian1
   vars:
@@ -238,9 +243,12 @@ Otra  forma:
   tasks:
   - name: ver variables
     debug:
-      msg: "{{mensaje}} {{curso}}" ```
+      msg: "{{mensaje}} {{curso}}" 
+```
+
 Resultado:
-```oot@vweb-1:/home/jorgegarciaotero/ansible# ansible-playbook variables.yaml
+```
+oot@vweb-1:/home/jorgegarciaotero/ansible# ansible-playbook variables.yaml
 [DEPRECATION WARNING]: Ansible will require Python 3.8 or newer on the controller starting with Ansible 2.12. Current version: 3.6.9 (default, Mar 10 2023, 16:46:00) [GCC 8.4.0]. This 
 feature will be removed from ansible-core in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
 
@@ -255,8 +263,8 @@ ok: [debian1] => {
 }
 
 PLAY RECAP ********************************************************************************************************************************************************************************
-debian1                    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0```
-
+debian1                    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
 
 ### 8.Control de Flujo. Condicionales, bucles y errores.
 Ejemplos en /control_flujo
@@ -265,7 +273,8 @@ Ejemplos en /control_flujo
   - Operadores:   < > >= <= !=  ==
   - "is defined"  permite saber si una variable existe.
   - para buscar en un array se puede usar el operador "in"
- ```TASK [Gathering Facts] ********************************************************************************************************************************************************************
+ ```
+ TASK [Gathering Facts] ********************************************************************************************************************************************************************
       ok: [tomcat1]
       ok: [tomcat2]
       ok: [mysql1]
@@ -307,7 +316,8 @@ Ejemplos en /control_flujo
       ok: [debian2] => {
           "msg": "Wed Jun 14 17:53:43 UTC 2023"
       }
-      skipping: [ubuntu1]```
+      skipping: [ubuntu1]
+```
   
 - __BUCLES:__:
 Tenemos distintos bucles:
@@ -315,7 +325,8 @@ Tenemos distintos bucles:
   - whit_<lookup>   whit_items, whit_list,  with_sequence ...
   - until
 En el siguiente ejempolo, con cada valor de loop, {{msg}} adquiere el valor de valor1, valor2, valor3:
-```---
+```
+---
 - name: Prueba básica con LOOP
   hosts: debian1
 
@@ -334,9 +345,12 @@ En el siguiente ejempolo, con cada valor de loop, {{msg}} adquiere el valor de v
     with_items:
        - valor1
        - valor2
-       - valor3```
+       - valor3
+```
+
 Resultado:
-```TASK [Gathering Facts] ********************************************************************************************************************************************************************
+```
+TASK [Gathering Facts] ********************************************************************************************************************************************************************
 ok: [debian1]
 
 TASK [Visualizar contenido con loop] ******************************************************************************************************************************************************
@@ -362,7 +376,8 @@ ok: [debian1] => (item=valor3) => {
 }
 
 PLAY RECAP ********************************************************************************************************************************************************************************
-debian1```
+debian1
+```
 
 
 ### 8. FILTROS
@@ -370,7 +385,8 @@ Permiten realizar tareas como conversiones, transformaciones, extracciones, manu
 Se ejecutan en el controller, no en la máqujina remota. Se usa el símbolo | para indicarlos.
 - Ejemplo: Ver el tipo de una variable.  Una vez que tengo las variables, tenego el método llamado "var" que nos permite devolver el valor de una variable. con ```var: cadena | type_debug```, si pongo la variable nos va a devolver el contenido. el método debug nos permite visualizar la variable con la que estamos trabajando. El tipo de la cadena "hola" nos devolverá "AnsibleUnicode". Si pones diccionario | type_debug saldrá "dict":
 
-```---
+```
+---
 - name: Ejemplos varios de filtros
   hosts: debian1
   vars:
@@ -389,7 +405,8 @@ Se ejecutan en el controller, no en la máqujina remota. Se usa el símbolo | pa
   tasks:
   - name: Averiguar el tipo de una variable
     ansible.builtin.debug:
-      var: diccionario | type_debug```
+      var: diccionario | type_debug
+```
 
 Resultado:
       ok: [debian1] => {
@@ -397,7 +414,8 @@ Resultado:
 }
 
 - __8.1.Conversiones:__ : Para convertir un tipo de variable a otra: Sea cadena de tipoi sting, convertir a entero ( cadena  | int: "true") te lo convierte a int:0, y (cadena | bool) te lo conbierte a true.
-```---
+```
+---
 - name: Ejemplos varios de filtros
   hosts: all
   vars:
@@ -434,11 +452,13 @@ Resultado:
   - name: visualizar version
     ansible.builtin.debug:
       msg: "{{ansible_facts['distribution_version']}}"
-    when: ansible_distribution_version | int > 10```
+    when: ansible_distribution_version | int > 10
+```
 
 
 - __8.2. Cadenas:__ : Convertir una cadena a upper, lower, replace ...
-```---
+```
+---
 - name: Ejemplos varios de filtros con CADENAS
   hosts: debian1
   vars:
@@ -460,10 +480,12 @@ Resultado:
 
   - name: Longitud de cadena
     ansible.builtin.debug:
-      var: cadena | length```
+      var: cadena | length
+```
 
 - __8.3. Números:__ :
- ```---
+ ```
+ ---
 - name: Ejemplos varios de filtros con NUMEROS
   hosts: debian1
   vars:
@@ -485,10 +507,12 @@ Resultado:
 
   - name: Nuero aleatorio
     ansible.builtin.debug:
-      var: numero  | int | random```
+      var: numero  | int | random
+```
 
   - __8.4. Listas:__ :
-  ```---
+  ```
+  ---
 - name: Ejemplos varios de filtros con LISTAS
   hosts: debian1
   vars:
@@ -519,4 +543,5 @@ Resultado:
 
   - name: Convertir cadena en lista
     ansible.builtin.debug:
-      msg: "{{cadena | split()}}" ```
+      msg: "{{cadena | split()}}" 
+  ```
