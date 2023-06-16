@@ -361,3 +361,160 @@ ok: [debian1] => (item=valor3) => {
 
 PLAY RECAP ********************************************************************************************************************************************************************************
 debian1```
+
+
+### 8. FILTROS
+Permiten realizar tareas como conversiones, transformaciones, extracciones, manupulación de datos, etc.
+Se ejecutan en el controller, no en la máqujina remota. Se usa el símbolo | para indicarlos.
+- Ejemplo: Ver el tipo de una variable.  Una vez que tengo las variables, tenego el método llamado "var" que nos permite devolver el valor de una variable. con ```var: cadena | type_debug```, si pongo la variable nos va a devolver el contenido. el método debug nos permite visualizar la variable con la que estamos trabajando. El tipo de la cadena "hola" nos devolverá "AnsibleUnicode". Si pones diccionario | type_debug saldrá "dict":
+
+```---
+- name: Ejemplos varios de filtros
+  hosts: debian1
+  vars:
+       cadena: "hola"
+       numero: 10
+       verdad: true
+       lista:
+          - pepe
+          - juan
+          - antonio
+       lista1: ['pepe','juan','antonio']  
+       diccionario:
+           nombre: juan
+           edad: 27  
+ 
+  tasks:
+  - name: Averiguar el tipo de una variable
+    ansible.builtin.debug:
+      var: diccionario | type_debug```
+
+Resultado:
+      ok: [debian1] => {
+    "diccionario | type_debug": "dict"
+}
+
+- __8.1.Conversiones:__ : Para convertir un tipo de variable a otra: Sea cadena de tipoi sting, convertir a entero ( cadena  | int: "true") te lo convierte a int:0, y (cadena | bool) te lo conbierte a true.
+```---
+- name: Ejemplos varios de filtros
+  hosts: all
+  vars:
+       cadena: "true"
+       numero: 10
+       verdad: true
+       lista:
+          - pepe
+          - juan
+          - antonio
+       lista1: ['pepe','juan','antonio']  
+       diccionario:
+           nombre: juan
+           edad: 27  
+ 
+  tasks:
+  
+  - name: Convertir a cadena
+    ansible.builtin.debug:
+      var: numero 
+
+  - name: Convertir a cadena
+    ansible.builtin.debug:
+      var: numero | string 
+
+  - name: Convertir a entero
+    ansible.builtin.debug:
+      var: cadena | int
+
+  - name: Convertir a entero
+    ansible.builtin.debug:
+      var: cadena | bool
+
+  - name: visualizar version
+    ansible.builtin.debug:
+      msg: "{{ansible_facts['distribution_version']}}"
+    when: ansible_distribution_version | int > 10```
+
+
+- __8.2. Cadenas:__ : Convertir una cadena a upper, lower, replace ...
+```---
+- name: Ejemplos varios de filtros con CADENAS
+  hosts: debian1
+  vars:
+       cadena: "Esto es una cadena"
+       
+  tasks:
+  
+  - name: Mayusculas
+    ansible.builtin.debug:
+      var: cadena | upper  
+
+  - name: Minusculas
+    ansible.builtin.debug:
+      var: cadena  | lower
+
+  - name: Reemplazar
+    ansible.builtin.debug:
+      var: cadena | replace("e","*")
+
+  - name: Longitud de cadena
+    ansible.builtin.debug:
+      var: cadena | length```
+
+- __8.3. Números:__ :
+ ```---
+- name: Ejemplos varios de filtros con NUMEROS
+  hosts: debian1
+  vars:
+       numero: 10.40
+       
+  tasks:
+  
+  - name: Potencia
+    ansible.builtin.debug:
+      var: numero | pow(4)
+  
+  - name: Raiz cuadrada
+    ansible.builtin.debug:
+      var: numero  | root()
+  
+  - name: Redondeo
+    ansible.builtin.debug:
+      var: numero  | round()
+
+  - name: Nuero aleatorio
+    ansible.builtin.debug:
+      var: numero  | int | random```
+
+  - __8.4. Listas:__ :
+  ```---
+- name: Ejemplos varios de filtros con LISTAS
+  hosts: debian1
+  vars:
+       lista_numero:
+         - 2
+         - 10
+         - 9
+         - 1
+       lista_cadena:
+         - Pedro
+         - Juan
+         - Rosa
+         - Antonio
+       cadena: "Esto es una cadena"
+  tasks:
+  
+  - name: Valor menor numero
+    ansible.builtin.debug:
+      msg: "{{lista_numero | min }} --- {{lista_numero | max }} "
+  
+  - name: Valor menor  cadena
+    ansible.builtin.debug:
+      msg: "{{lista_cadena | min }} --- {{lista_cadena | max }}" 
+
+  - name: Unir elementos de una lista
+    ansible.builtin.debug:
+      msg: "{{lista_cadena | join(',')}}" 
+
+  - name: Convertir cadena en lista
+    ansible.builtin.debug:
+      msg: "{{cadena | split()}}" ```
