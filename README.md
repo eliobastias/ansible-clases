@@ -548,9 +548,9 @@ Resultado:
 
 
 
-### 8. ROLES
+### 9. ROLES
 Conjunto de carpetas de directorios y ficheros que es como una plantilla o blueprint para poder generar de manera global múltiples componentes dentro de un play o Playbook.
-- Por ejemplo se puedne usar handlers de tareas o ariables para crear o configurar Apache y eso lo puedo poner en un rol y reusar luego dentro de otros playbooks.
+- Por ejemplo se pueden usar handlers de tareas o ariables para crear o configurar Apache y eso lo puedo poner en un rol y reusar luego dentro de otros playbooks.
 - Pueden ser reusados fácilmente y compartidos con otros usuarios y proyectos.
 - Permiten dividir el trabajo en distintos archivos, de forma que es más fácil su uso y reutilización.
 - Es una especie de "librería".
@@ -575,8 +575,242 @@ role1
     main.yml
 ```
 | Carpeta     | Descripción                                              |  
-|:------------|--------------------------------------------------------:| 
+|:------------|:--------------------------------------------------------| 
 | Handlers    |  Handlers que pueden ser invocados por otras tareas  |  
 | Templates   |  Plantillas a utilizar  |  
 | Meta        |  metadatos de rol, por ejemplo, el autor, las dependencias y las plataformas de soporte  |  
 | Tets        |  Para realizar pruebas  |  
+- Los roles se pueden incluir:
+  - A nivel de Plays: Se usa la cláusula "roles". Es un import estático. Se cargan y ejecutan antes que el resto de tareas.
+  - A nivel de Tasks de forma dinámica: Con "include_role", lo que permite ejecutarlos en el orden y lugar donde han sido definidos.
+  - Tasks de forma estática: Con "import_role". Se comportan igual que los definidos a nivel del play.
+
+  - __9.1. Crear un Role:__ : Con el comando ```ansible-galaxy init desarrollo``` podemos crear un rol "desarrollo". Si hacemos ```tree mariadb``` se crea un directorio y dentro podemos ver  los 8 directorios con sus ficheros de variables, tareas, ficheros ...
+```
+mariadb
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars
+    └── main.yml
+```
+
+  - __9.1. Ejemplo básico de un Role:__ :  En un rol no se puede poner un play, solo tareas.
+En el main.yml de tasks, si el servidor es un debian creamos un server de mariadb y lo arrancamos:
+```
+---
+# tasks file for mariadb
+- name: Instalar {{software}}
+  ansible.builtin.apt: 
+     name: "{{software}}"
+     state: present
+  when: ansible_facts['distribution'] | lower =='debian' 
+
+- name: arrancar el servicio {{servicio}}
+  ansible.builtin.service:
+          name: "{{servicio}}"
+          state: started
+  when: ansible_facts['distribution'] | lower =='debian' 
+```
+Fuera del directorio mariadb creamos un play.yaml con el rol mariadb, automáticamente se van a crear las tareas del rol y luego las que tienen que ver con el playbook.
+Primero instala mariadb, luego lo arranca y luego sale a ejecutar "se ha instalado el software ..."
+```
+- name: Ejemplos de un role
+  hosts: debian1
+  roles:
+     - mariadb
+  vars:
+     software: apache2
+     servicio: apache2
+  tasks:
+
+  - name: Ultima tarea
+    ansible.builtin.debug:
+      msg: "Se ha instalado el software {{software}}"ansi
+```
+
+  - __9.2.Roles a nivel de tarea__ :  Puedo incluir el rol a nivel de Play o de Task, y si lo hago a nivel de Task tengo 2 opciones (la tarea con el rol a nivel dinámico o dinámico.). El rol, siempre y cuando lo incluyo a nivel del play, se ejecuta en primer lugar.
+  ```
+  El siguiente ejemplo, primero ejecuta la tarea "Comienzo el juevo", luego las que haya en el rol y finalmente "Se ha terminado ..."
+---
+- name: Ejemplos de un role con handlers y files
+  hosts: debian1
+  
+  tasks: 
+
+  - name: Primera tarea del play del PLAY
+    ansible.builtin.debug:
+      msg: "Comienzo el juego"
+  
+  - name: Incluir el role
+    import_role:
+      name: mariadb
+
+  - name: Ultima tarea del PLAY
+    ansible.builtin.debug:
+      msg: "Se ha terminado el proceso {{software}}"
+  ```
+
+### 10. TAGS
+Nos permiten ejecutar o saltar determinadas tareas de un Playbook. Es más sencillo que usar When. Se pueden añadir a nivel de bloque, play, tarea o incluso rol.
+  - __10.1. Tags a nivel de tarea__ :  Supongamos que queremos separar las tareas a nivel de producción y desarrollo.
+
+    ```
+    ---
+    - name: Trabajar con TAGS
+      hosts: debian1
+      
+      tasks:
+
+      - name: Preparar desarrollo
+        ansible.builtin.debug:
+          msg: Preparar el entorno de desarrollo
+        tags:
+            - desarrollo
+      
+      - name: Preparar producción
+        ansible.builtin.debug:
+          msg: Preparar el entorno de produccion
+        tags:
+          - produccion
+
+      - name: Instalar mysql
+        ansible.builtin.debug:
+          msg: "Instalando mysql"
+        tags:
+          - desarrollo
+          - produccion
+
+      - name: Instalar herramientas desarrollo
+        ansible.builtin.debug:
+          msg: "Proceso Terminado"
+        tags:
+            - desarrollo
+
+      - name: Instalar la seguridad de producción
+        ansible.builtin.debug:
+          msg: "Instalar el entornod de seguridad"
+        tags:
+          - produccion
+
+      - name: Desplegar aplicacion 
+        ansible.builtin.debug:
+          msg: "Desplegar aplicación"
+        tags:
+          - desarrollo
+          - produccion
+    ```
+
+    - Para ejecutarla en todas las máquinas: ``` ansible-playbook -i maquinas tags.yaml -t all```
+     ```
+        PLAY [Trabajar con TAGS] ********************************************************************************************************************************************************
+
+        TASK [Gathering Facts] **********************************************************************************************************************************************************
+        ok: [debian1]
+
+        TASK [Preparar desarrollo] ******************************************************************************************************************************************************
+        ok: [debian1] => {
+            "msg": "Preparar el entorno de desarrollo"
+        }
+
+        TASK [Preparar producción] ******************************************************************************************************************************************************
+        ok: [debian1] => {
+            "msg": "Preparar el entorno de produccion"
+        }
+
+        TASK [Instalar mysql] ***********************************************************************************************************************************************************
+        ok: [debian1] => {
+            "msg": "Instalando mysql"
+        }
+
+        TASK [Instalar herramientas desarrollo] *****************************************************************************************************************************************
+        ok: [debian1] => {
+            "msg": "Proceso Terminado"
+        }
+
+        TASK [Instalar la seguridad de producción] **************************************************************************************************************************************
+        ok: [debian1] => {
+            "msg": "Instalar el entornod de seguridad"
+        }
+
+        TASK [Desplegar aplicacion] *****************************************************************************************************************************************************
+        ok: [debian1] => {
+            "msg": "Desplegar aplicación"
+        }
+     ````
+    - Para ejecutarla en las máquinas de desarrollo ```ansible-playbook -i maquinas tags.yaml -t desarrollo ``` 
+    ```
+
+      [DEPRECATION WARNING]: Ansible will require Python 3.8 or newer on the controller starting with Ansible 2.12. Current version: 3.6.9 (default, Mar 10 2023, 16:46:00) [GCC 
+      8.4.0]. This feature will be removed from ansible-core in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+
+      PLAY [Trabajar con TAGS] ********************************************************************************************************************************************************
+
+      TASK [Gathering Facts] **********************************************************************************************************************************************************
+      ok: [debian1]
+
+      TASK [Preparar desarrollo] ******************************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Preparar el entorno de desarrollo"
+      }
+
+      TASK [Instalar mysql] ***********************************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Instalando mysql"
+      }
+
+      TASK [Instalar herramientas desarrollo] *****************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Proceso Terminado"
+      }
+
+      TASK [Desplegar aplicacion] *****************************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Desplegar aplicación"
+      }
+
+      PLAY RECAP **********************************************************************************************************************************************************************
+      debian1                    : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+    ```
+    - Y en producción: ```ansible-playbook -i maquinas tags.yaml -t produccion```
+```
+      PLAY [Trabajar con TAGS] ********************************************************************************************************************************************************
+
+      TASK [Gathering Facts] **********************************************************************************************************************************************************
+      ok: [debian1]
+
+      TASK [Preparar producción] ******************************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Preparar el entorno de produccion"
+      }
+
+      TASK [Instalar mysql] ***********************************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Instalando mysql"
+      }
+
+      TASK [Instalar la seguridad de producción] **************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Instalar el entornod de seguridad"
+      }
+
+      TASK [Desplegar aplicacion] *****************************************************************************************************************************************************
+      ok: [debian1] => {
+          "msg": "Desplegar aplicación"
+      }
+
+      PLAY RECAP **********************************************************************************************************************************************************************
+      debian1                    : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+

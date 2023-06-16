@@ -1,0 +1,13 @@
+---
+# tasks file for mariadb
+- name: Instalar {{software}}
+  ansible.builtin.apt: 
+     name: "{{software}}"
+     state: present
+  when: ansible_facts['distribution'] | lower =='debian' 
+
+- name: arrancar el servicio {{servicio}}
+  ansible.builtin.service:
+          name: "{{servicio}}"
+          state: started
+  when: ansible_facts['distribution'] | lower =='debian' 
