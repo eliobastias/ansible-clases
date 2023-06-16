@@ -545,3 +545,38 @@ Resultado:
     ansible.builtin.debug:
       msg: "{{cadena | split()}}" 
   ```
+
+
+
+### 8. ROLES
+Conjunto de carpetas de directorios y ficheros que es como una plantilla o blueprint para poder generar de manera global múltiples componentes dentro de un play o Playbook.
+- Por ejemplo se puedne usar handlers de tareas o ariables para crear o configurar Apache y eso lo puedo poner en un rol y reusar luego dentro de otros playbooks.
+- Pueden ser reusados fácilmente y compartidos con otros usuarios y proyectos.
+- Permiten dividir el trabajo en distintos archivos, de forma que es más fácil su uso y reutilización.
+- Es una especie de "librería".
+- Disponen de una estructura de archivos conocida. Tienen 8 directorios principales:
+```
+role1
+  defaults
+    main.yml
+  files
+  handlers
+    main.yml
+  meta
+    main.yml
+  README.md
+  tasks
+    main.yml
+  templates
+  tests
+    inventory
+    test.yml
+  vars
+    main.yml
+```
+| Carpeta     | Descripción                                              |  
+|:------------|--------------------------------------------------------:| 
+| Handlers    |  Handlers que pueden ser invocados por otras tareas  |  
+| Templates   |  Plantillas a utilizar  |  
+| Meta        |  metadatos de rol, por ejemplo, el autor, las dependencias y las plataformas de soporte  |  
+| Tets        |  Para realizar pruebas  |  
