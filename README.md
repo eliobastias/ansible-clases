@@ -165,26 +165,28 @@ Las variables en si mismo no son nada, se le pasan al playbook.
                 puerto: 9000
                 entorno: desarrrollo ```
 Cogiendo el fichero maquinas, vemos que podemos hacer que las máquinas debian hereden la variable puerto=9090 con [debian:vars]
-    ```[debian]
-    debian1
-    debian2
+```
+[debian]
+debian1
+debian2
 
-    [debian:vars]
-    puerto=9090
+[debian:vars]
+puerto=9090
 
-    [rocky]
-    rocky1
-    rocky2
+[rocky]
+rocky1
+rocky2
 
-    [ubuntu]
-    ubuntu1 puerto=9090 entorno=desarrollo ansible_user=pepe
+[ubuntu]
+ubuntu1 puerto=9090 entorno=desarrollo ansible_user=pepe
 
-    [servidores_de_datos]
-    mysql1
+[servidores_de_datos]
+mysql1
 
-    [servidores_de_aplicaciones]
-    tomcat1
-    tomcat2```
+[servidores_de_aplicaciones]
+tomcat1
+tomcat2
+```
 
 Puedo coger variables de grupos anidados
 ```[debian]
