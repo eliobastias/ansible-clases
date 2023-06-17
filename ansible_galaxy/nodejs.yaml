@@ -1,0 +1,11 @@
+---
+- name: Instalar NodeJS
+  hosts: debian1
+  
+  roles:
+    - geerlingguy.nodejs
+
+  pre_tasks:
+  - name: Instalar Node.js
+    ansible.builtin.debug:
+      msg: Voy a instalar Node.js a través de un rol de Galaxy

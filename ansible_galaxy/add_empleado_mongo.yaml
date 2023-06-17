@@ -1,0 +1,14 @@
+---
+- name: Insertar un nuevo empleado
+  hosts: debian1
+  
+  collections:
+   - community.mongodb
+  
+  tasks:
+  - name: Insertar empleado
+    community.mongodb.mongodb_shell:
+      login_user: admin
+      login_password: admin
+      eval:  'db.Employee.insert({"Employeeid" : 2,"EmployeeName" : "pedro"}) '
+      db: db1

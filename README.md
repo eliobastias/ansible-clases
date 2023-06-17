@@ -784,7 +784,7 @@ Nos permiten ejecutar o saltar determinadas tareas de un Playbook. Es más senci
       debian1                    : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
     ```
     - Y en producción: ```ansible-playbook -i maquinas tags.yaml -t produccion```
-```
+    ```
       PLAY [Trabajar con TAGS] ********************************************************************************************************************************************************
 
       TASK [Gathering Facts] **********************************************************************************************************************************************************
@@ -812,5 +812,190 @@ Nos permiten ejecutar o saltar determinadas tareas de un Playbook. Es más senci
 
       PLAY RECAP **********************************************************************************************************************************************************************
       debian1                    : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-```
+    ```
 
+    - También es posible ejecutarlas en ambas tal que: ```ansible-playbook -i maquinas tags.yaml -t produccion,desarrollo```
+
+Para listar las etiquetas: ```ansible-playbook tags.yaml --list-tags```
+
+### 11. ANSIBLE GALAXY
+Es un hub / repositorio central de internet desde el que nos podemos descargar Roles y Colecciones
+Con el comando '''ansible-galaxy```, que ya hemos usado para crear roles, podemos interactuar con el entorno de ansible-galaxy.
+Si nos creamos una cuenta, podemos crear y subir roles.
+- __11.1.Algunos comandos:__
+  - ```ansible-galaxy list``` o ```ansible-galaxy role list```: Te muestra la lista de roles o colecciones si tienes alguna instalada. Si instalamos nodejs, por ejemplo, te dice donde está instalado.
+  - ```ansible-galaxy collection -h````
+  - ```ansible-galaxy install geerlingguy.nodejs```: Instalas el ansible role the node.js (https://galaxy.ansible.com/geerlingguy/nodejs)
+    - Si vamos al directorio que indica ```ansible-galaxy list```, (~/.ansible/roles/geerlingguy.nodejs/) tienes un entorno con todos los yaml, el Readme, etc.
+    - Luego, ejecutamos el playbook ```ansible-playbook -i maquinas ansible_galaxy/nodejs.yaml``` para ejecutar el playbook e instalar NodeJs a través del rol de galaxy.
+    ```
+      ---
+    - name: Instalar NodeJS
+      hosts: debian1
+      
+      roles:
+        - geerlingguy.nodejs
+
+      pre_tasks:
+      - name: Instalar Node.js
+        ansible.builtin.debug:
+          msg: Voy a instalar Node.js a través de un rol de Galaxy
+    ```
+  - ```ansible-galaxy role info <nombre_rol>```, ejemplo: ```ansible-galaxy role info  geerlingguy.nodejs``` nos devuelve información acerca del rol: info github, descargas, forks... versión, licencia ...
+
+  - ```ansible-galaxy role search python | grep install```: Nos devuelve todos los roles que tengan que ver algo con python e install
+  - ```ansible-galaxy role remove geerlingguy.nodejs```: Elimina el rol
+
+- __11.2.Colecciones:__ Agrupan roles, playbooks, ... 
+  - Docs: https://docs.ansible.com/ansible/latest/collections_guide/index.html
+  - Namespace: Nombre que se le pone a un entorno con múltiples colecciones (https://docs.ansible.com/ansible/latest/collections/ansible/index.html): Amazon, Netbox, Google, Grafana, ...
+  - Instalando una colección: ```ansible-galaxy collection install community.mongodb```. Se instalan las dependencias de dicha colección también.
+  - ```ansible-galaxy collection list```: Te muestra las colecciones isntaladas.
+  - Para poder instalar mongodb a través de esta colección, tenemos que hacer uso de roles. En el siguiente ejemplo, por orden:
+    - Preparar linux, instalar repositorio, instala bbdd, lo arranca y gestiona la seguridad.
+    - Es necesario poner el collections, para indicarle que vamos a incluir la colección community.mongodb
+    - Como pre tarea, se instala pymongo.
+    ```
+    ---
+    - name: Instalar MongoDB a través de una colección de Galaxy
+      hosts: debian1
+      roles:
+       - community.mongodb.mongodb_linux
+       - community.mongodb.mongodb_repository
+       - community.mongodb.mongodb_install
+       - community.mongodb.mongodb_mongos
+       - community.mongodb.mongodb_auth
+       
+
+      collections:
+       - community.mongodb
+      
+      pre_tasks:
+      - name: Instalar pymongo
+        ansible.builtin.shell:
+          cmd: pip install pymongo
+  ```
+  - Con ```ansible-playbook -i maquinas ansible_galaxy/mongodb_coleccion.yaml ``` te instala el mongo en las debian.
+    - Luego podemos conectarnos a la máquina y creando un user admin: ```ssh debian```; ```mongosh -u admin -p admin```
+    - Luego podemos cargar el playbook add_empleado_mongo.yaml que nos permite insertar un empleado: ```ansible-playbook -i maquinas ansible_galaxy/add_empleado_mongo.yaml```
+    ```
+    ---
+    - name: Insertar un nuevo empleado
+      hosts: debian1
+      
+      collections:
+       - community.mongodb
+      
+      tasks:
+      - name: Insertar empleado
+        community.mongodb.mongodb_shell:
+          login_user: admin
+          login_password: admin
+          eval:  'db.Employee.insert({"Employeeid" : 2,"EmployeeName" : "pedro"}) '
+          db: db1
+    ```
+
+
+
+### 12. ANSIBLE VAULT
+Para proteger ficheros/variables. Nos permite proteger el contenido sensible de nuestros sistemas. Encriptación/desencriptación, edición de ficheros, etc.
+- __12.1.Introducción:__ Dispone de varias opciones para encriptar/desencriptar ficheros de variable, ver y editar ficheros, etc.
+  - Cada vez que queramos encriptar algo debemos facilitar una password, que luego será usada para poder desencriptar el contenido.
+  - Podemos encriptar variables y ficheros:
+    - variables: ```ansible-vault encrypt_string 'ejemplo' --name 'v1'```
+    - ficheros: ```ansible-vault encrypt fichero.yaml'```
+  - Para desencriptar podemos:
+    - Pasar desde línea de comandos.
+    - Desde un fichero.
+    - Desde un script.
+- __12.2.Ecriptar ficheros existentes. Visualizar su contenido:__
+  - Creamos un fichero claves.yaml con dos password :
+    pass: prueba
+    pass1: prueba1
+  - Introducimos ```ansible-vault encrypt ansible_vault/claves.yaml``` y nos pide una password que debemos recordar. Al abrir el yaml:
+  ```
+  $ANSIBLE_VAULT;1.1;AES256
+    39323565396633323364653666333731643111111111115
+    61356233383439356431361320a37613764656261313237
+    31386461346165326463613533306361313938313137351
+    62616463393516265356635393535396564353064363131
+    32316164663031366338636533643432111111111111111
+    ```
+   Si queremos desencripptarlo ```ansible-vault view ansible_vault/claves.yaml``` y nos pedirá la password.
+
+- __12.3.Crear ficheros encriptados:__ ```ansible-vault create ansible_vault/claves2.yaml``. Se abre un editor de texto tras pedirnos la contraseña, ahí podemos poner las claves y automáticamente está encriptado
+  - Podemos editar las claves con  ```ansible-vault edit ansible_vault/claves2.yaml`
+
+- __12.4.Desencriptar un fichero:__
+  - Para desencriptar: ```ansible-vault decrypt ansible_vault/claves2.yaml`
+  - Para cambiar la clave: ```ansible-vault rekey ansible_vault/claves2.yaml`
+
+- __12.5.Usar Vault en Playbooks:__
+  - Creamos el vault.yamal.
+    ```
+    ---
+- name: Probar Vault creando usuarios y claves
+  hosts: debian1
+  vars_files: usuarios.yaml
+
+  tasks: 
+    - name: Crear usuarios
+      ansible.builtin.user:
+        name: "{{item.name}}"
+        password: "{{item.pass | password_hash('sha512')}}"
+      loop: "{{usuarios}}"
+  ```
+  - creamos el yaml usuarios.yaml con usuario y password.
+
+  - ejecutamos el playbook ```ansible-playbook -i maquinas ansible_galaxy/add_empleado_mongo.yaml``` y el fichero usuarios.yaml se quedará encriptado
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 12. STORAGE
+Hay múltiples módulos que nos permiten trabajar con el almacenamiento de nuestros servidores. Hay módulos generalistas que permiten trabajar con distintos tipos de disco y otros orientados a distintos fabricantes y tipos de infraestructura.
+- Entre los generalistas: ansible_facts, parted, filesystem, mount, LVG y LVOL, win_partition,win_initialize, win_format, win_disk_facts...
+- Entre los específicos: Emc, glusterfs, zfs, IBM, Netapp, Vexadata, ...

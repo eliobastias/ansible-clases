@@ -1,0 +1,12 @@
+---
+- name: Probar Vault creando usuarios y claves
+  hosts: debian1
+  vars_files: usuarios.yaml
+
+  tasks: 
+    - name: Crear usuarios
+      ansible.builtin.user:
+        name: "{{item.name}}"
+        password: "{{item.pass | password_hash('sha512')}}"
+      loop: "{{usuarios}}"
+
